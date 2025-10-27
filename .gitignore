@@ -39,3 +39,94 @@
 
 # debug information files
 *.dwo
+# ===========================================
+#  Git Ignore para C++ / Qt / MinGW / CLion
+# ===========================================
+
+# --- Archivos de compilación ---
+build/
+build-*/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+CMakeScripts/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+
+# --- Binarios y librerías generadas ---
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+*.obj
+*.o
+*.pdb
+*.ilk
+*.manifest
+
+# --- Archivos de Qt generados automáticamente ---
+moc_*
+ui_*
+qrc_*
+*.qmlc
+*.jsc
+*.qmake.stash
+*.qmake.cache
+*.pro.user
+*.pro.user.*
+*.autosave
+*.qrc.depends
+*.qrc.release
+*.qrc.debug
+
+# --- Archivos temporales de CLion / JetBrains ---
+.idea/
+.idea/*
+!.idea/codeStyles
+!.idea/fileTemplates
+!.idea/vcs.xml
+!.idea/.name
+*.iml
+
+# --- Archivos de cache y logs ---
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
+
+# --- Archivos del compilador MinGW / MSVC ---
+*.idb
+*.tlog
+*.lastbuildstate
+
+# --- Archivos de depuración ---
+*.dSYM/
+*.objdump
+
+# --- Archivos de entorno o configuración local ---
+.env
+*.user
+*.user.*
+*.config
+*.local
+
+# --- Archivos de prueba ---
+/tests/build/
+/tests/output/
+
+# --- Archivos generados por ejecutables ---
+*.out
+*.app
+*.apk
+
+# --- Documentación o datos temporales ---
+/docs/_build/
+/markdowns/*.html
