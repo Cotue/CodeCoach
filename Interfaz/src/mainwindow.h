@@ -17,6 +17,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    void cargarMarkdownEnScrollArea(const QString& filePath);
 };
 
 #endif // MAINWINDOW_H
