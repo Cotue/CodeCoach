@@ -4,6 +4,7 @@ project(MiInterfazQt)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_AUTOUIC_SEARCH_PATHS
         ${CMAKE_CURRENT_SOURCE_DIR}/Interfaz/forms
+        ${CMAKE_CURRENT_SOURCE_DIR}/core
 )
 
 # Qt
@@ -16,15 +17,16 @@ set(CMAKE_AUTOUIC ON)
 # Archivos de código
 set(SOURCES
         main.cpp
-        Interfaz/src/MainWindow.cpp
+        Interfaz/src/mainwindow.cpp
 )
 
 set(HEADERS
-        Interfaz/src/MainWindow.h
+        Interfaz/src/mainwindow.h
+        core/include/Interpreter.h
 )
 
 set(UIS
-        Interfaz/forms/MainWindow.ui
+        Interfaz/forms/mainwindow.ui
 )
 
 # Crear ejecutable

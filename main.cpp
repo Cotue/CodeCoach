@@ -4,7 +4,7 @@
 #include <QTranslator>
 
 #include <QApplication>
-#include "Interfaz/src/MainWindow.h"
+#include "Interfaz/src/mainwindow.h"
 
 int main(int argc, char *argv[])
 {
