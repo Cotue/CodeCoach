@@ -1,12 +1,17 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include <QFile>
+#include <QPlainTextEdit>
+#include <QVBoxLayout>
+#include <QFont>
+#include <QScrollArea>
 #include <QTextStream>
 #include <QTextBrowser>
 #include <QVBoxLayout>
 #include <QDebug>
 #include <QCoreApplication>
 #include <QDir>
+#include "CppHighlighter.h"
+#include "CodeEditor.h"
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -15,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
     QString rutaArchivo = QDir(QCoreApplication::applicationDirPath())
                       .filePath("../markdowns/prueba.md");
     cargarMarkdownEnScrollArea(rutaArchivo);
+    crearEditorEnScrollArea2();
 }
 
 MainWindow::~MainWindow()
@@ -61,4 +67,39 @@ void MainWindow::cargarMarkdownEnScrollArea(const QString& filePath)
     }
 
     layout->addWidget(browser);
+}
+void MainWindow::crearEditorEnScrollArea2()
+{
+    // 🧱 Editor con números de línea, línea actual y fondo oscuro
+    CodeEditor* editor = new CodeEditor(this);
+
+    // ✨ Resaltado de sintaxis C++
+    new CppHighlighter(editor->document());
+
+    editor->setPlaceholderText("// Escribe tu código aquí...\n");
+
+    // 📦 Obtener el widget contenido dentro del scrollArea
+    QWidget* contenido = ui->scrollArea_2->widget();
+    if (!contenido) {
+        qWarning("scrollArea_2 no tiene contenido interno asignado desde Qt Designer");
+        return;
+    }
+
+    // 📐 Obtener o crear el layout dentro del contenido
+    QVBoxLayout* layout = qobject_cast<QVBoxLayout*>(contenido->layout());
+    if (!layout) {
+        layout = new QVBoxLayout(contenido);
+        contenido->setLayout(layout);
+    }
+
+    // 🧹 Limpiar cualquier widget previo dentro del layout
+    QLayoutItem* item;
+    while ((item = layout->takeAt(0)) != nullptr) {
+        if (item->widget())
+            item->widget()->deleteLater();
+        delete item;
+    }
+
+    // ➕ Agregar el editor al layout
+    layout->addWidget(editor);
 }

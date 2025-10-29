@@ -17,14 +17,19 @@ set(CMAKE_AUTOUIC ON)
 set(SOURCES
         main.cpp
         Interfaz/src/mainwindow.cpp
+        Interfaz/src/CppHighlighter.cpp
+        Interfaz/src/CodeEditor.cpp
 )
 
 set(HEADERS
         Interfaz/src/mainwindow.h
+        Interfaz/src/CppHighlighter.h
+        Interfaz/src/CodeEditor.h
 )
 
 set(UIS
         Interfaz/forms/mainwindow.ui
+        Interfaz/src/CppHighlighter.h
 )
 
 # Crear ejecutable
