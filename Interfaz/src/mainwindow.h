@@ -18,6 +18,12 @@ public:
 private:
     Ui::MainWindow *ui;
     void cargarMarkdownEnScrollArea(const QString& filePath);
+    void crearEditorEnScrollArea2();
+    QString rutaArchivoTemporal;
+
+
+private slots:
+    void guardarCodigoTemporal();
 };
 
 #endif // MAINWINDOW_H
