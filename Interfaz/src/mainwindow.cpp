@@ -17,58 +17,66 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    QString rutaArchivo = QDir(QCoreApplication::applicationDirPath())
-                      .filePath("../markdowns/prueba.md");
-    cargarMarkdownEnScrollArea(rutaArchivo);
     crearEditorEnScrollArea2();
     connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::guardarCodigoTemporal);
+    connect(ui->comboBox, &QComboBox::textActivated,
+        this, &MainWindow::cargarMarkdownPorDificultad);
+    qDebug() << "[DEBUG] Constructor iniciado";
+
+
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
-void MainWindow::cargarMarkdownEnScrollArea(const QString& filePath)
+void MainWindow::cargarMarkdownEnScrollArea(const QString& markdown)
 {
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "No se pudo abrir el archivo:" << filePath;
-        return;
-    }
-
-    QTextStream in(&file);
-    QString markdown = in.readAll();
-    file.close();
-
-    // Crear QTextBrowser
-    QTextBrowser* browser = new QTextBrowser(this);
-    browser->setMarkdown(markdown); // ✅ Solo disponible en Qt 6.4+
-    browser->setOpenExternalLinks(true);
-    browser->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    // Obtener el contenido interno de scrollArea1
     QWidget* contenido = ui->scrollArea1->widget();
     if (!contenido) {
         contenido = new QWidget();
         ui->scrollArea1->setWidget(contenido);
     }
 
-    // Asegurar layout vertical
     QVBoxLayout* layout = qobject_cast<QVBoxLayout*>(contenido->layout());
     if (!layout) {
         layout = new QVBoxLayout(contenido);
         contenido->setLayout(layout);
     }
 
-    // Limpiar contenido previo
+    // LIMPIAR contenido anterior de forma segura
     QLayoutItem* item;
     while ((item = layout->takeAt(0)) != nullptr) {
-        delete item->widget();
+        if (item->widget())
+            item->widget()->deleteLater(); // <<<< seguro
         delete item;
     }
 
+    // Crear el nuevo visor SIN parent "this"
+    QTextBrowser* browser = new QTextBrowser(contenido);
+    browser->setMarkdown(markdown);
+    browser->setOpenExternalLinks(true);
+
     layout->addWidget(browser);
 }
+void MainWindow::cargarMarkdownPorDificultad(const QString& dificultad)
+{
+    qDebug() << "[DEBUG] Se llamó cargarMarkdownPorDificultad con:" << dificultad;
+    // Evitar que cargue automáticamente al iniciar la app
+    if (primeraSeleccion) {
+        primeraSeleccion = false;
+        return;
+    }
+
+    QString markdown = mongo.obtenerMarkdown(dificultad);
+
+    if (markdown.startsWith("No")) {
+        markdown = "# No hay contenido disponible para esta dificultad.\nSeleccione otra opción.";
+    }
+
+    cargarMarkdownEnScrollArea(markdown);
+}
+
 void MainWindow::crearEditorEnScrollArea2()
 {
     // 🧱 Crear el editor de código

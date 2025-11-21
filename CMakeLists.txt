@@ -1,10 +1,16 @@
 cmake_minimum_required(VERSION 3.25)
 project(MiInterfazQt)
-
+set(CMAKE_TOOLCHAIN_FILE "C:/vcpkg/scripts/buildsystems/vcpkg.cmake")
+set(mongocxx_DIR "C:/vcpkg/installed/x64-windows/share/mongocxx")
 set(CMAKE_CXX_STANDARD 23)
+
+
 set(CMAKE_AUTOUIC_SEARCH_PATHS
         ${CMAKE_CURRENT_SOURCE_DIR}/Interfaz/forms
 )
+find_package(mongocxx CONFIG REQUIRED)
+find_package(bsoncxx CONFIG REQUIRED)
+
 
 # Qt
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
@@ -19,12 +25,14 @@ set(SOURCES
         Interfaz/src/mainwindow.cpp
         Interfaz/src/CppHighlighter.cpp
         Interfaz/src/CodeEditor.cpp
+        Interfaz/src/MongoService.cpp
 )
 
 set(HEADERS
         Interfaz/src/mainwindow.h
         Interfaz/src/CppHighlighter.h
         Interfaz/src/CodeEditor.h
+        Interfaz/src/MongoService.h
 )
 
 set(UIS
@@ -40,6 +48,11 @@ target_include_directories(MiInterfazQt PUBLIC
 )
 
 target_link_libraries(MiInterfazQt PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
+target_link_libraries(MiInterfazQt
+        PRIVATE
+        mongo::mongocxx_shared
+        mongo::bsoncxx_shared
+)
 
 
 
