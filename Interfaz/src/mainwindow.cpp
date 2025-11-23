@@ -3,72 +3,102 @@
 #include <QVBoxLayout>
 #include <QScrollArea>
 #include <QTextStream>
-#include <QTextBrowser>
 #include <QDebug>
 #include <QCoreApplication>
 #include "CppHighlighter.h"
 #include "CodeEditor.h"
 #include <QPlainTextEdit>
-#include <QDir>
 #include <QFile>
+#include <QTextBrowser>
+#include <QDir>
 #include <QMessageBox>
+#include <QThread>
+#include "Compiler.h"
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    QString rutaArchivo = QDir(QCoreApplication::applicationDirPath())
-                      .filePath("../markdowns/prueba.md");
-    cargarMarkdownEnScrollArea(rutaArchivo);
     crearEditorEnScrollArea2();
-    connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::guardarCodigoTemporal);
+    connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::enviarCodigo);
+    connect(ui->comboBox, &QComboBox::textActivated,
+        this, &MainWindow::cargarMarkdownPorDificultad);
+    qDebug() << "[DEBUG] Constructor iniciado";
+    // Configuración del hilo y el compilador
+
+    // Compilador
+    compiler = new Compiler;
+
+    // Mover el comopilador al hilo
+    compiler->moveToThread(&compilerThread);
+    // 3. Conectamos las señales
+
+    // Conexión para iniciar el trabajo (GUI -> Worker)
+    connect(this, &MainWindow::startProcessing, compiler, &Compiler::processCode);
+
+    // Conexiones para recibir resultados (Worker -> GUI)
+    connect(compiler, &Compiler::newOutput, this, &MainWindow::handleNewOutput);
+    connect(compiler, &Compiler::taskFinished, this, &MainWindow::handleTaskFinished);
+
+    // Conexión para limpiar el worker cuando el hilo termine
+    connect(&compilerThread, &QThread::finished, compiler, &QObject::deleteLater);
+
+    // 4. Iniciamos el hilo. Ahora está "dormido" esperando señales.
+    compilerThread.start();
+
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
-void MainWindow::cargarMarkdownEnScrollArea(const QString& filePath)
+void MainWindow::cargarMarkdownEnScrollArea(const QString& markdown)
 {
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "No se pudo abrir el archivo:" << filePath;
-        return;
-    }
-
-    QTextStream in(&file);
-    QString markdown = in.readAll();
-    file.close();
-
-    // Crear QTextBrowser
-    QTextBrowser* browser = new QTextBrowser(this);
-    browser->setMarkdown(markdown); // ✅ Solo disponible en Qt 6.4+
-    browser->setOpenExternalLinks(true);
-    browser->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    // Obtener el contenido interno de scrollArea1
     QWidget* contenido = ui->scrollArea1->widget();
     if (!contenido) {
         contenido = new QWidget();
         ui->scrollArea1->setWidget(contenido);
     }
 
-    // Asegurar layout vertical
     QVBoxLayout* layout = qobject_cast<QVBoxLayout*>(contenido->layout());
     if (!layout) {
         layout = new QVBoxLayout(contenido);
         contenido->setLayout(layout);
     }
 
-    // Limpiar contenido previo
+    // LIMPIAR contenido anterior de forma segura
     QLayoutItem* item;
     while ((item = layout->takeAt(0)) != nullptr) {
-        delete item->widget();
+        if (item->widget())
+            item->widget()->deleteLater(); // <<<< seguro
         delete item;
     }
 
+    // Crear el nuevo visor SIN parent "this"
+    QTextBrowser* browser = new QTextBrowser(contenido);
+    browser->setMarkdown(markdown);
+    browser->setOpenExternalLinks(true);
+
     layout->addWidget(browser);
 }
+void MainWindow::cargarMarkdownPorDificultad(const QString& dificultad)
+{
+    qDebug() << "[DEBUG] Se llamó cargarMarkdownPorDificultad con:" << dificultad;
+    // Evitar que cargue automáticamente al iniciar la app
+    if (primeraSeleccion) {
+        primeraSeleccion = false;
+        return;
+    }
+
+    QString markdown = mongo.obtenerMarkdown(dificultad);
+
+    if (markdown.startsWith("No")) {
+        markdown = "# No hay contenido disponible para esta dificultad.\nSeleccione otra opción.";
+    }
+
+    cargarMarkdownEnScrollArea(markdown);
+}
+
 void MainWindow::crearEditorEnScrollArea2()
 {
     // 🧱 Crear el editor de código
@@ -99,8 +129,7 @@ void MainWindow::crearEditorEnScrollArea2()
 }
 
 
-void MainWindow::guardarCodigoTemporal()
-{
+void MainWindow::enviarCodigo() {
     // Buscar el editor (CodeEditor o QPlainTextEdit) dentro de scrollArea_2
     QWidget* contenido = ui->scrollArea_2->widget();
     if (!contenido) {
@@ -120,25 +149,21 @@ void MainWindow::guardarCodigoTemporal()
         return;
     }
 
-    // 🔸 Crear carpeta temp junto al ejecutable
-    QString rutaTemp = QCoreApplication::applicationDirPath() + "/temp";
-    QDir dir(rutaTemp);
-    if (!dir.exists()) {
-        dir.mkpath(".");
-    }
+    // Compilación y ejecución del código
+    ui->TextoSalida->clear();
+    ui->pushButton->setEnabled(false);
 
-    // 🔸 Guardar archivo temporal
-    rutaArchivoTemporal = dir.filePath("temp_code.cpp");
-    QFile archivo(rutaArchivoTemporal);
-    if (!archivo.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", "No se pudo crear el archivo temporal.");
-        return;
-    }
+    emit startProcessing(codigo);
 
-    QTextStream salida(&archivo);
-    salida << codigo;
-    archivo.close();
+}
 
-    QMessageBox::information(this, "Guardado exitoso",
-        "Código guardado en:\n" + rutaArchivoTemporal);
+void MainWindow::handleNewOutput(const QString &output)
+{
+    // ¡Esto ahora funcionará!
+    ui->TextoSalida->appendPlainText(output);
+}
+
+void MainWindow::handleTaskFinished()
+{
+    ui->pushButton->setEnabled(true);
 }

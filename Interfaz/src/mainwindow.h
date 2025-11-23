@@ -2,7 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QThread>
 
+#include "MongoService.h"
+#include "Compiler.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -17,13 +20,26 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    void cargarMarkdownEnScrollArea(const QString& filePath);
+    QThread compilerThread; // Hilo del compilador.
+    Compiler *compiler; // Puntero al compilador.
+    void cargarMarkdownEnScrollArea(const QString& markdown);
     void crearEditorEnScrollArea2();
     QString rutaArchivoTemporal;
+    MongoService mongo;
+    bool primeraSeleccion = true;
 
 
 private slots:
-    void guardarCodigoTemporal();
+    void enviarCodigo();
+    void cargarMarkdownPorDificultad(const QString& dificultad);
+    // Slots dedicados al compilador, reaccionando a las señales que transmite
+    void handleNewOutput(const QString &output);
+    void handleTaskFinished();
+
+    // Señal para comunicarse con el hilo de forma segura
+    signals:
+        void startProcessing(const QString &code);
+
 };
 
 #endif // MAINWINDOW_H
