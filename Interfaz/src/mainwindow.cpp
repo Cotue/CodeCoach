@@ -3,26 +3,48 @@
 #include <QVBoxLayout>
 #include <QScrollArea>
 #include <QTextStream>
-#include <QTextBrowser>
 #include <QDebug>
 #include <QCoreApplication>
 #include "CppHighlighter.h"
 #include "CodeEditor.h"
 #include <QPlainTextEdit>
-#include <QDir>
 #include <QFile>
+#include <QTextBrowser>
+#include <QDir>
 #include <QMessageBox>
+#include <QThread>
+#include "Compiler.h"
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     crearEditorEnScrollArea2();
-    connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::guardarCodigoTemporal);
+    connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::enviarCodigo);
     connect(ui->comboBox, &QComboBox::textActivated,
         this, &MainWindow::cargarMarkdownPorDificultad);
     qDebug() << "[DEBUG] Constructor iniciado";
+    // Configuración del hilo y el compilador
 
+    // Compilador
+    compiler = new Compiler;
+
+    // Mover el comopilador al hilo
+    compiler->moveToThread(&compilerThread);
+    // 3. Conectamos las señales
+
+    // Conexión para iniciar el trabajo (GUI -> Worker)
+    connect(this, &MainWindow::startProcessing, compiler, &Compiler::processCode);
+
+    // Conexiones para recibir resultados (Worker -> GUI)
+    connect(compiler, &Compiler::newOutput, this, &MainWindow::handleNewOutput);
+    connect(compiler, &Compiler::taskFinished, this, &MainWindow::handleTaskFinished);
+
+    // Conexión para limpiar el worker cuando el hilo termine
+    connect(&compilerThread, &QThread::finished, compiler, &QObject::deleteLater);
+
+    // 4. Iniciamos el hilo. Ahora está "dormido" esperando señales.
+    compilerThread.start();
 
 }
 
@@ -107,8 +129,7 @@ void MainWindow::crearEditorEnScrollArea2()
 }
 
 
-void MainWindow::guardarCodigoTemporal()
-{
+void MainWindow::enviarCodigo() {
     // Buscar el editor (CodeEditor o QPlainTextEdit) dentro de scrollArea_2
     QWidget* contenido = ui->scrollArea_2->widget();
     if (!contenido) {
@@ -128,25 +149,21 @@ void MainWindow::guardarCodigoTemporal()
         return;
     }
 
-    // 🔸 Crear carpeta temp junto al ejecutable
-    QString rutaTemp = QCoreApplication::applicationDirPath() + "/temp";
-    QDir dir(rutaTemp);
-    if (!dir.exists()) {
-        dir.mkpath(".");
-    }
+    // Compilación y ejecución del código
+    ui->TextoSalida->clear();
+    ui->pushButton->setEnabled(false);
 
-    // 🔸 Guardar archivo temporal
-    rutaArchivoTemporal = dir.filePath("temp_code.cpp");
-    QFile archivo(rutaArchivoTemporal);
-    if (!archivo.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", "No se pudo crear el archivo temporal.");
-        return;
-    }
+    emit startProcessing(codigo);
 
-    QTextStream salida(&archivo);
-    salida << codigo;
-    archivo.close();
+}
 
-    QMessageBox::information(this, "Guardado exitoso",
-        "Código guardado en:\n" + rutaArchivoTemporal);
+void MainWindow::handleNewOutput(const QString &output)
+{
+    // ¡Esto ahora funcionará!
+    ui->TextoSalida->appendPlainText(output);
+}
+
+void MainWindow::handleTaskFinished()
+{
+    ui->pushButton->setEnabled(true);
 }

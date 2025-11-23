@@ -26,6 +26,7 @@ set(SOURCES
         Interfaz/src/CppHighlighter.cpp
         Interfaz/src/CodeEditor.cpp
         Interfaz/src/MongoService.cpp
+        Interfaz/src/Compiler.cpp
 )
 
 set(HEADERS
@@ -33,6 +34,7 @@ set(HEADERS
         Interfaz/src/CppHighlighter.h
         Interfaz/src/CodeEditor.h
         Interfaz/src/MongoService.h
+        Interfaz/src/Compiler.h
 )
 
 set(UIS
