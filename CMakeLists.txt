@@ -1,16 +1,10 @@
 cmake_minimum_required(VERSION 3.25)
 project(MiInterfazQt)
-set(CMAKE_TOOLCHAIN_FILE "C:/vcpkg/scripts/buildsystems/vcpkg.cmake")
-set(mongocxx_DIR "C:/vcpkg/installed/x64-windows/share/mongocxx")
+
 set(CMAKE_CXX_STANDARD 23)
-
-
 set(CMAKE_AUTOUIC_SEARCH_PATHS
         ${CMAKE_CURRENT_SOURCE_DIR}/Interfaz/forms
 )
-find_package(mongocxx CONFIG REQUIRED)
-find_package(bsoncxx CONFIG REQUIRED)
-
 
 # Qt
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
@@ -28,6 +22,7 @@ set(SOURCES
         Interfaz/src/CppHighlighter.cpp
         Interfaz/src/CodeEditor.cpp
         Interfaz/src/LLMservice.h
+        Interfaz/src/ComplexityAnalyzer.h
 )
 
 set(HEADERS
@@ -35,6 +30,7 @@ set(HEADERS
         Interfaz/src/CppHighlighter.h
         Interfaz/src/CodeEditor.h
         Interfaz/src/LLMservice.h
+        Interfaz/src/ComplexityAnalyzer.h
 )
 
 set(UIS
@@ -44,11 +40,15 @@ set(UIS
         Interfaz/src/Compiler.h
         Interfaz/src/LLMservice.cpp
         Interfaz/src/LLMservice.h
+        Interfaz/src/ComplexityAnalyzer.cpp
+        Interfaz/src/ComplexityAnalyzer.h
+        Interfaz/src/ComplexityAnalyzer.h
 )
 
 # Crear ejecutable
 add_executable(MiInterfazQt ${SOURCES} ${HEADERS} ${UIS}
-        Interfaz/src/LLMservice.h)
+        Interfaz/src/LLMservice.h
+        Interfaz/src/ComplexityAnalyzer.h)
 
 target_include_directories(MiInterfazQt PUBLIC
         Interfaz/src
