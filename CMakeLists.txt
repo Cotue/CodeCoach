@@ -14,6 +14,8 @@ find_package(bsoncxx CONFIG REQUIRED)
 
 # Qt
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Network)
+
 
 # Habilitar MOC y UIC automáticos
 set(CMAKE_AUTOMOC ON)
@@ -25,36 +27,34 @@ set(SOURCES
         Interfaz/src/mainwindow.cpp
         Interfaz/src/CppHighlighter.cpp
         Interfaz/src/CodeEditor.cpp
-        Interfaz/src/MongoService.cpp
-        Interfaz/src/Compiler.cpp
+        Interfaz/src/LLMservice.h
 )
 
 set(HEADERS
         Interfaz/src/mainwindow.h
         Interfaz/src/CppHighlighter.h
         Interfaz/src/CodeEditor.h
-        Interfaz/src/MongoService.h
-        Interfaz/src/Compiler.h
+        Interfaz/src/LLMservice.h
 )
 
 set(UIS
         Interfaz/forms/mainwindow.ui
         Interfaz/src/CppHighlighter.h
+        Interfaz/src/Compiler.cpp
+        Interfaz/src/Compiler.h
+        Interfaz/src/LLMservice.cpp
+        Interfaz/src/LLMservice.h
 )
 
 # Crear ejecutable
-add_executable(MiInterfazQt ${SOURCES} ${HEADERS} ${UIS})
+add_executable(MiInterfazQt ${SOURCES} ${HEADERS} ${UIS}
+        Interfaz/src/LLMservice.h)
 
 target_include_directories(MiInterfazQt PUBLIC
         Interfaz/src
 )
 
-target_link_libraries(MiInterfazQt PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
-target_link_libraries(MiInterfazQt
-        PRIVATE
-        mongo::mongocxx_shared
-        mongo::bsoncxx_shared
-)
+target_link_libraries(MiInterfazQt PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
 
 
 

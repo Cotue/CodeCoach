@@ -83,6 +83,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="btnAyuda">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Ayuda</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </widget>

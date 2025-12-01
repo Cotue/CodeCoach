@@ -1,37 +1,68 @@
-# CODING CHALLENGE
+# 🟦 **Coding Challenge: Suma de Dos Enteros**
 
-1. Implemente un algoritmo que determine si todos los caracteres de un string son únicos o no.
-2. ¿Qué haría si no se permite estructuras de datos adicionales?
+## 📝 **Descripción del Problema**
 
-## Requerimientos
+Dado un par de números enteros, implementa un algoritmo que **retorne la suma de ambos**, sin utilizar el operador `+` ni `-`.
+Tu objetivo es resolverlo utilizando únicamente operaciones **bitwise** (operaciones a nivel de bits).
 
-- Devuelve True o False.
-- Ejemplos de inputs y outputs:
+Este tipo de ejercicio es común en entrevistas técnicas para evaluar entendimiento de aritmética binaria y manipulación de bits.
 
-“” → True
+---
 
-“AAB” → False
+## 🎯 **Objetivo**
 
-“ABC” → True
+Implementar una función:
 
-- Input de la A - Z solo mayúscula.
-- Utiliza ASCII únicamente.
+```
+int sumar(int a, int b)
+```
 
-## Solución
+que retorne la suma de `a` y `b` **sin usar operadores aritméticos tradicionales**.
 
-```cpp
-	boolean[] seen = new boolean (128);
-	for(int i = 0; i < input.len; i++){
-		int val = input.charAt(i);
-		if (seen[val]){
-			return false;
-		}
-		seen[val] = true;
-	}
-	return true;
+---
+
+## 🧠 **Idea Principal**
+
+Para sumar dos enteros sin `+`, utilizamos lógica binaria:
+
+1. **XOR (`^`)** suma los bits sin considerar “carry”.
+2. **AND (`&`)** identifica dónde hay “carry”.
+3. El “carry” se desplaza una posición a la izquierda con `<< 1`.
+4. Repetimos hasta que ya no haya carry.
+
+---
+
+## 📘 **Ejemplos**
+
+| Entrada           | Explicación                           | Salida |
+| ----------------- | ------------------------------------- | ------ |
+| `a = 3`, `b = 5`  | 3 (011), 5 (101) → resultado 8 (1000) | `8`    |
+| `a = -2`, `b = 4` | Funciona también para negativos       | `2`    |
+| `a = 0`, `b = 0`  | Caso básico                           | `0`    |
+
+---
+
+## 💡 **Solución (Java-like pseudocode)**
+
+```java
+int sumar(int a, int b) {
+    while (b != 0) {
+        int carry = (a & b) << 1;  // posiciones donde ambos bits son 1
+        a = a ^ b;                 // suma binaria sin carry
+        b = carry;                 // movemos el carry y repetimos
+    }
+    return a;
 }
 ```
 
-Complejidad→ O(n)
+---
 
+## 📈 **Complejidad**
+
+* **Tiempo:**
+  O(1) — limitado por el número fijo de bits del entero (32 bits).
+* **Espacio:**
+  O(1) — uso constante de memoria.
+
+---
 Complejidad espacial → constante, 128
