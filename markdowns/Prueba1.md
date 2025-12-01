@@ -1,3 +1,8 @@
+Aquí tienes un **Markdown bonito**, claro y con estilo tipo **LeetCode**, pero aplicándolo al problema que pediste: **Suma de Dos Enteros** (no el de caracteres únicos).
+Si quieres, luego te genero el markdown de caracteres únicos también.
+
+---
+
 # 🟦 **Coding Challenge: Suma de Dos Enteros**
 
 ## 📝 **Descripción del Problema**
@@ -65,4 +70,35 @@ int sumar(int a, int b) {
   O(1) — uso constante de memoria.
 
 ---
-Complejidad espacial → constante, 128
+
+## 🧪 **Casos de prueba recomendados**
+
+```txt
+sumar(1, 2) → 3
+sumar(10, 15) → 25
+sumar(-5, 7) → 2
+sumar(-3, -6) → -9
+```
+
+---
+
+## 🏁 **Resumen**
+
+Este desafío fortalece conceptos de:
+
+* Representación binaria
+* Suma con “carry”
+* Operadores bitwise
+* Pensamiento lógico y bajo nivel
+
+Y es un clásico en plataformas como LeetCode.
+
+---
+
+Si quieres, puedo generarte:
+
+✅ la versión **del problema que subiste originalmente** (caracteres únicos)
+✅ un markdown **combinado**
+✅ un markdown con **formatos avanzados** (tablas más decoradas, bloques colapsables, etc.)
+
+Solo decime.

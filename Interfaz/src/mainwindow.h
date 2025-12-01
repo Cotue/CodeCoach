@@ -6,7 +6,10 @@
 #include <QThread>
 #include <LLMservice.h>
 #include <CodeEditor.h>
+#include <QThread>
 
+#include "MongoService.h"
+#include "Compiler.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -32,6 +35,9 @@ private:
     QThread compilerThread;
     Compiler *compiler;
     void cargarMarkdownEnScrollArea(const QString& filePath);
+    QThread compilerThread; // Hilo del compilador.
+    Compiler *compiler; // Puntero al compilador.
+    void cargarMarkdownEnScrollArea(const QString& markdown);
     void crearEditorEnScrollArea2();
     void on_btnPedirPista();
     QString rutaArchivoTemporal;
@@ -40,6 +46,21 @@ private:
     LLMService *m_llmService;
     QString m_ultimoCodigo;
     QString m_ultimaSalida;
+    MongoService mongo;
+    bool primeraSeleccion = true;
+
+
+private slots:
+    void enviarCodigo();
+    void cargarMarkdownPorDificultad(const QString& dificultad);
+    // Slots dedicados al compilador, reaccionando a las señales que transmite
+    void handleNewOutput(const QString &output);
+    void handleTaskFinished();
+
+    // Señal para comunicarse con el hilo de forma segura
+    signals:
+        void startProcessing(const QString &code);
+
 };
 
 #endif // MAINWINDOW_H

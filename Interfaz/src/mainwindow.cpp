@@ -3,14 +3,14 @@
 #include <QVBoxLayout>
 #include <QScrollArea>
 #include <QTextStream>
-#include <QTextBrowser>
 #include <QDebug>
 #include <QCoreApplication>
 #include "CppHighlighter.h"
 #include "CodeEditor.h"
 #include <QPlainTextEdit>
-#include <QDir>
 #include <QFile>
+#include <QTextBrowser>
+#include <QDir>
 #include <QMessageBox>
 #include "Compiler.h"
 
@@ -22,9 +22,6 @@ MainWindow::MainWindow(QWidget *parent)
     // Para el LLM
     m_CodeEditor = nullptr;
     ui->setupUi(this);
-    QString rutaArchivo = QDir(QCoreApplication::applicationDirPath())
-                      .filePath("../markdowns/prueba.md");
-    cargarMarkdownEnScrollArea(rutaArchivo);
     crearEditorEnScrollArea2();
     connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::enviarCodigo);
 
@@ -76,7 +73,7 @@ MainWindow::~MainWindow()
     compilerThread.wait();
     delete ui;
 }
-void MainWindow::cargarMarkdownEnScrollArea(const QString& filePath)
+void MainWindow::cargarMarkdownEnScrollArea(const QString& markdown)
 {
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -101,19 +98,24 @@ void MainWindow::cargarMarkdownEnScrollArea(const QString& filePath)
         ui->scrollArea1->setWidget(contenido);
     }
 
-    // Asegurar layout vertical
     QVBoxLayout* layout = qobject_cast<QVBoxLayout*>(contenido->layout());
     if (!layout) {
         layout = new QVBoxLayout(contenido);
         contenido->setLayout(layout);
     }
 
-    // Limpiar contenido previo
+    // LIMPIAR contenido anterior de forma segura
     QLayoutItem* item;
     while ((item = layout->takeAt(0)) != nullptr) {
-        delete item->widget();
+        if (item->widget())
+            item->widget()->deleteLater(); // <<<< seguro
         delete item;
     }
+
+    // Crear el nuevo visor SIN parent "this"
+    QTextBrowser* browser = new QTextBrowser(contenido);
+    browser->setMarkdown(markdown);
+    browser->setOpenExternalLinks(true);
 
     layout->addWidget(browser);
 }
